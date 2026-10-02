@@ -1,0 +1,1 @@
+Sebagai pelengkap nilai mata kuliah Manajemen Proyek Perangkat Lunak, 6 Orang mahasiswa ngide membuat Sistem Pemilihan Pintar menggunakan Pengenalan Wajah. Apakah projek ini akan beres dengan lancar? Saya harap iya. Tapi saya yakin bisa dengan bantuan AI OKAWKOAWOK
