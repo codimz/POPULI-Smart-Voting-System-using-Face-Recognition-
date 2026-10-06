@@ -1,15 +1,10 @@
-// app/page.tsx
 'use client';
 
 import Link from 'next/link';
-import { Header } from '@/components/layout/Header';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-slate-50/50 flex flex-col justify-between font-sans">
-      {/* Header Tahap 1 dari 9 */}
-      <Header currentStep={1} totalSteps={9} />
-
+    <div className="bg-slate-50/50 min-h-[calc(100vh-4rem)] flex flex-col justify-between font-sans">
       {/* Main Content Area */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 md:px-8 py-8 md:py-16 flex flex-col md:flex-row items-center justify-between gap-10">
         
@@ -83,7 +78,7 @@ export default function LandingPage() {
             <span>Siapkan NIM dan token yang dikirimkan melalui email institusi.</span>
           </div>
 
-          {/* Tombol ke Halaman Login (Tahap 2) */}
+          {/* Tombol ke Halaman Login */}
           <Link
             href="/login"
             className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-500/20 text-sm"
