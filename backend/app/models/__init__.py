@@ -7,6 +7,7 @@ from app.models.election import Election
 from app.models.biometric_verification import BiometricVerification
 from app.models.voting_token import VotingToken
 from app.models.idempotency import IdempotencyRecord
+from app.models.vote_receipt import VoteReceipt
 
 __all__ = [
     "StudentDPT",
@@ -18,4 +19,5 @@ __all__ = [
     "BiometricVerification",
     "VotingToken",
     "IdempotencyRecord",
+    "VoteReceipt",
 ]

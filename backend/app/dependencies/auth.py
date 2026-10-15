@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import decode_token, verify_voting_token
 from app.core.database import get_db
-from app.models.student import StudentDPT
+from app.models.student import StudentDPT, UserRole
 from app.models.voting_status import VotingStatus
 from app.models.voting_token import VotingToken, TokenStatus
 
@@ -97,9 +97,8 @@ async def get_current_admin(
 ) -> StudentDPT:
     student = await get_current_student(request, credentials, db)
 
-    # In a real implementation, check for admin role
-    # For now, we'll check if email is admin or use a separate admin table
-    if not student.email.endswith("@admin.kampus.ac.id"):
+    # Check for admin role
+    if student.role != UserRole.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access required",
@@ -109,12 +108,15 @@ async def get_current_admin(
     return student
 
 
-def require_roles(*allowed_roles: str):
+def require_roles(*allowed_roles: UserRole):
     async def role_checker(
         student: StudentDPT = Depends(get_current_student),
     ) -> StudentDPT:
-        # In a real implementation, check student.role against allowed_roles
-        # For MVP, we'll just pass through
+        if student.role not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Required role: {', '.join(r.value for r in allowed_roles)}",
+            )
         return student
 
     return role_checker
@@ -141,6 +143,7 @@ async def get_voting_token_payload(
 
 
 async def validate_voting_token(
+    request: Request,
     payload: dict = Depends(get_voting_token_payload),
     db: AsyncSession = Depends(get_db),
 ) -> VotingToken:
@@ -167,5 +170,8 @@ async def validate_voting_token(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Voting token expired or already used",
         )
+
+    # Attach to request for rate limiting
+    request.state.nim = token.student_nim
 
     return token

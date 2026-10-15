@@ -44,11 +44,11 @@ CHALLENGE_TYPES = [LivenessMethod.BLINK, LivenessMethod.SMILE, LivenessMethod.HE
     "/verify",
     response_model=BiometricVerifyResponse,
     status_code=status.HTTP_202_ACCEPTED,
-    dependencies=[Depends(rate_limit_biometric)],
 )
 async def verify_face(
     frames: List[UploadFile] = File(..., description="Video frames for face verification"),
     student: StudentDPT = Depends(get_current_student),
+    _rate_limit: None = Depends(rate_limit_biometric),
     db: AsyncSession = Depends(get_db),
 ):
     """Start face verification with liveness detection."""
@@ -198,8 +198,16 @@ async def verify_face(
 
     except Exception as e:
         await db.rollback()
-        verification.status = VerificationStatus.FAILED
-        verification.error_message = str(e)
+        # Create a NEW record for failure status since the original is detached after rollback
+        failed_verification = BiometricVerification(
+            verification_id=f"ver_{uuid.uuid4().hex[:12]}",
+            student_nim=student.nim,
+            status=VerificationStatus.FAILED,
+            error_message=str(e),
+            attempts=1,
+            max_attempts=settings.MAX_BIOMETRIC_ATTEMPTS,
+        )
+        db.add(failed_verification)
         await db.commit()
 
         raise HTTPException(

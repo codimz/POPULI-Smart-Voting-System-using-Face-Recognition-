@@ -1,10 +1,11 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, Header, status
+from fastapi import APIRouter, Depends, HTTPException, Header, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.dependencies.auth import get_current_student, validate_voting_token
+from app.dependencies.rate_limit import rate_limit_voting
 from app.models.student import StudentDPT
 from app.models.biometric_verification import BiometricVerification, VerificationStatus
 from app.models.voting_token import VotingToken, TokenStatus
@@ -137,8 +138,10 @@ async def issue_voting_token(
     status_code=status.HTTP_201_CREATED,
 )
 async def cast_vote(
+    request: Request,
     vote_request: CastVoteRequest,
     token: VotingToken = Depends(validate_voting_token),
+    _rate_limit: None = Depends(rate_limit_voting),
     idempotency_key: str = Header(..., alias="Idempotency-Key"),
     db: AsyncSession = Depends(get_db),
 ):
@@ -192,19 +195,34 @@ async def cast_vote(
 )
 async def get_receipt(
     receipt_id: str,
+    student: StudentDPT = Depends(get_current_student),
     db: AsyncSession = Depends(get_db),
 ):
     """Get vote receipt (verification of participation without revealing choice)."""
-    # In a real implementation, receipt would be stored
-    # For now, return a placeholder
+    vote_engine = get_vote_engine(db)
+    receipt = await vote_engine.get_receipt(receipt_id)
+
+    if not receipt:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Receipt tidak ditemukan",
+        )
+
+    # Verify receipt belongs to this student
+    if receipt.get("student_nim") != student.nim:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tidak memiliki akses ke receipt ini",
+        )
+
     return ReceiptResponse(
         success=True,
         message="Status receipt berhasil diambil.",
         data=ReceiptData(
-            receipt_id=receipt_id,
-            receipt_hash="sha256_hash_placeholder",
+            receipt_id=receipt["receipt_id"],
+            receipt_hash=receipt["vote_hash"],
             status="accepted",
-            election_id="el_2026_hima",
+            election_id=receipt.get("election_id", ""),
         ),
         meta={"request_id": f"req_{uuid.uuid4().hex[:8]}"},
     )

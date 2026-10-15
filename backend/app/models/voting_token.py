@@ -19,7 +19,7 @@ class VotingToken(Base, TimestampMixin):
     __table_args__ = (
         Index("ix_voting_tokens_student_status", "student_nim", "status"),
         Index("ix_voting_tokens_election", "election_id"),
-        Index("ix_voting_tokens_token", "token_hash", unique=True),
+        # token_hash has unique=True on column, so no need for separate unique index
     )
 
     token_id: Mapped[str] = mapped_column(
@@ -34,7 +34,7 @@ class VotingToken(Base, TimestampMixin):
     verification_id: Mapped[str] = mapped_column(
         String(50), ForeignKey("biometric_verifications.verification_id", ondelete="CASCADE"), nullable=False
     )
-    token_hash: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
+    token_hash: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     status: Mapped[TokenStatus] = mapped_column(
         Enum(TokenStatus), default=TokenStatus.ISSUED, nullable=False
     )

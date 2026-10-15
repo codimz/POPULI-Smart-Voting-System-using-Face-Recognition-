@@ -16,6 +16,7 @@ from app.models.election import Election, ElectionStatus
 from app.models.biometric_verification import BiometricVerification, VerificationStatus
 from app.models.voting_token import VotingToken, TokenStatus
 from app.models.idempotency import IdempotencyRecord
+from app.models.vote_receipt import VoteReceipt
 from app.services.redis_client import get_redis
 
 
@@ -125,7 +126,7 @@ class VoteEngine:
         candidate_id: int,
         election_id: str,
         idempotency_key: str,
-    ) -> tuple[BallotBox, str]:
+    ) -> tuple[BallotBox, str, str]:
         """Cast vote atomically with idempotency."""
         # Check idempotency
         existing = await self.db.execute(
@@ -158,6 +159,20 @@ class VoteEngine:
             vote_hash=vote_hash,
         )
         self.db.add(ballot)
+
+        # Flush to get ballot_id for receipt
+        await self.db.flush()
+
+        # Create vote receipt
+        receipt_id = f"rcpt_{uuid.uuid4().hex[:12]}"
+        receipt = VoteReceipt(
+            receipt_id=receipt_id,
+            student_nim=token.student_nim,
+            election_id=election_id,
+            vote_hash=vote_hash,
+            ballot_id=ballot.ballot_id,
+        )
+        self.db.add(receipt)
 
         # Mark token as consumed
         token.status = TokenStatus.CONSUMED
@@ -199,17 +214,23 @@ class VoteEngine:
             await self.db.rollback()
             raise ValueError("Vote already cast or database error")
 
-        # Generate receipt ID
-        receipt_id = f"rcpt_{uuid.uuid4().hex[:12]}"
-
         return ballot, receipt_id, vote_hash
 
     async def get_receipt(self, receipt_id: str) -> Optional[dict]:
         """Get vote receipt (without revealing candidate choice)."""
-        # In a real implementation, you'd store receipt metadata
-        # For now, we can't look up by receipt_id without storing it
-        # This is a placeholder
-        return None
+        result = await self.db.execute(
+            select(VoteReceipt).where(VoteReceipt.receipt_id == receipt_id)
+        )
+        receipt = result.scalar_one_or_none()
+        if not receipt:
+            return None
+        return {
+            "receipt_id": receipt.receipt_id,
+            "student_nim": receipt.student_nim,
+            "election_id": receipt.election_id,
+            "vote_hash": receipt.vote_hash,
+            "created_at": receipt.created_at.isoformat() if receipt.created_at else None,
+        }
 
     async def get_results(self, election_id: str) -> list[dict]:
         """Get election results."""

@@ -35,6 +35,7 @@ class StudentUpdate(BaseModel):
 class StudentResponse(StudentBase):
     is_registered: bool
     has_voted: bool
+    role: str
     created_at: str
     updated_at: str
 
@@ -48,6 +49,7 @@ class StudentResponse(StudentBase):
                 "email": "budi.santoso@student.kampus.ac.id",
                 "is_registered": True,
                 "has_voted": False,
+                "role": "student",
                 "created_at": "2026-10-01T00:00:00Z",
                 "updated_at": "2026-10-01T00:00:00Z"
             }
