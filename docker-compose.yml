@@ -34,5 +34,43 @@ services:
       timeout: 5s
       retries: 10
 
+  redis:
+    image: redis:7-alpine
+    container_name: populi-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: populi-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://populi:populi_dev_password@postgres:5432/voting_system
+      - DATABASE_URL_SYNC=postgresql://populi:populi_dev_password@postgres:5432/voting_system
+      - REDIS_URL=redis://redis:6379/0
+      - AI_SERVICE_URL=http://ai-service:8001
+      - SQL_ECHO=false
+      - DEBUG=false
+      - PYTHONPATH=/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./backend/app:/app/app:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   postgres_data:

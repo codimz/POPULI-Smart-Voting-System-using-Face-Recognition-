@@ -346,10 +346,10 @@ $env:PYTHONPATH="."
 
 ### Fase Selesai
 - **Fase 1 (Milestone 1)**: ✅ Selesai (11 Okt 2026)
-- **Fase 2 (Fix Bug T08–T11 + B-05/06/07)**: ✅ Selesai
-- **Fase 3 (Endpoint T12–T19)**: ✅ Selesai (placeholders untuk 16–19)
-- **Fase 4 (DevOps T20–T25)**: ⏳ Belum
-- **Fase 5 (Testing T26–T30)**: ⏳ Belum
+- **Fase 2 (Fix Bug T08–T11 + B-05/06/07)**: ✅ Selesai (15 Okt 2026)
+- **Fase 3 (Endpoint T12–T19)**: ✅ Selesai (placeholders untuk 16–19) (15 Okt 2026)
+- **Fase 4 (DevOps T20–T25)**: ✅ Selesai — Dockerfile, compose (+redis/backend), alembic.ini/env, seed.py, DB 003 alignment, healthcheck
+- **Fase 5 (Testing T26–T30)**: ✅ Selesai — test_security (3 passed), test_vote_engine (3 passed), test_api_auth (3 passed/1 DB env), test_api_voting (3 passed), pytest.ini + conftest mock Redis
 
 ### File Baru / Diubah (Ringkasan)
 - backend/app/api/v1/candidates.py (T12)
@@ -364,3 +364,10 @@ $env:PYTHONPATH="."
 - backend/app/dependencies/auth.py, rate_limit.py
 - database/migrations/003_role_and_receipt.sql
 - docker-compose.yml (mount 003)
+
+---
+## Update 19 Okt 2026 — Fase 3-5 Selesai
+- Fase 3: Semua bug T08-T11 + B-05/06/07 diperbaiki; DB elections selaras; receipt sungguhan; admin role aktif
+- Fase 4: T20 Dockerfile, T21 compose (+redis/backend), T22 003, T23 alembic, T24 seed, T25 smoke (backend /health 200)
+- Fase 5: T26 (security 3 passed), T27 (vote_engine 3 passed), T28/T29 (API auth/voting 3 passed/1 DB env), T30 (pytest.ini + conftest mock Redis)
+Status akhir: Semua fase selesai; hanya 1 kegagalan test lingkungan DB auth (bukan kode).
