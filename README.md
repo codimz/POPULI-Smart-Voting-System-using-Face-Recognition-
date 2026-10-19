@@ -1,3 +1,4 @@
+=======
 # POPULI Smart Voting System using Face Recognition
 
 POPULI is a campus e-voting system designed to support secure and auditable elections using face recognition and biometric verification.
@@ -191,3 +192,4 @@ The current Sprint 1 environment establishes the reproducible development founda
 * Frontend container
 
 API contracts, backend services, and face-recognition integration will be developed in subsequent sprints.
+>>>>>>> 5e47b2ef255a20baed45437faba9cec7e9122b8a

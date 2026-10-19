@@ -2,36 +2,26 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 
-interface HeaderProps {
-  currentStep?: number;
-  totalSteps?: number;
-}
-
-export const Header: React.FC<HeaderProps> = ({ currentStep = 1, totalSteps = 9 }) => {
+export const Header: React.FC = () => {
   return (
-    <header className="w-full bg-white border-b border-gray-100 px-4 md:px-8 py-3.5 flex justify-between items-center sticky top-0 z-50">
-      {/* Brand Logo */}
-      <div className="flex items-center gap-2.5">
-        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">
-          🏛️️
+    <header className="w-full bg-[#1c1c1e] border-b border-[#2c2c2e] px-6 py-3.5 flex justify-between items-center sticky top-0 z-50 text-white">
+      {/* Brand Logo (Kotak Putih dengan Ikon Gedung Hitam) */}
+      <Link href="/" className="flex items-center gap-3">
+        <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center text-gray-900 font-bold shadow-sm">
+          🏛️
         </div>
         <div className="flex flex-col">
-          <span className="font-bold text-gray-900 tracking-tight leading-none text-sm md:text-base">POPULI</span>
+          <span className="font-bold text-white tracking-tight leading-none text-sm">POPULI</span>
           <span className="text-[10px] text-gray-400 font-medium">POPULI</span>
         </div>
-      </div>
+      </Link>
 
-      {/* Badge Status Pemilihan */}
-      <div className="hidden md:flex items-center gap-2 bg-emerald-50 border border-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-medium">
-        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        Pemilihan sedang berlangsung
-      </div>
-
-      {/* Indikator Tahap */}
-      <div className="flex items-center gap-1.5 text-xs text-gray-500 border border-gray-200 px-3 py-1 rounded-full bg-gray-50/50">
-        <span className="text-blue-600 font-semibold">🛡️</span>
-        <span>Tahap {currentStep} dari {totalSteps}</span>
+      {/* Badge Status Pemilihan (Di Tengah/Kanan) */}
+      <div className="flex items-center gap-2 bg-[#2c2c2e]/60 border border-[#3a3a3c] text-gray-300 px-3.5 py-1.5 rounded-full text-xs font-medium">
+        <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+        <span>Pemilihan sedang berlangsung</span>
       </div>
     </header>
   );
